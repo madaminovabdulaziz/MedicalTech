@@ -1,0 +1,8 @@
+aiogram==2.25.2
+environs
+openpyxl
+PyMySQL
+pytz
+SQLAlchemy
+XlsxWriter
+
