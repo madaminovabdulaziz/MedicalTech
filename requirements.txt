@@ -7,4 +7,4 @@ SQLAlchemy
 XlsxWriter
 pandas
 numpy
-
+requests
