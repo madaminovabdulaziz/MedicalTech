@@ -20,16 +20,18 @@ import requests
 
 
 def get_adress(latitude, longitude):
+    headers = {
+        "User-Agent": "MedicalTech/1.0"
+    }
     url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}"
-    response = requests.get(url)
-    print(response)
-    # data = response.json()
+    response = requests.get(url, headers=headers)
+    data = response.json()
     
-    # if 'address' in data:
-    #     address = data['display_name']
-    #     return address
+    if 'address' in data:
+        address = data['display_name']
+        return address
     
-    # return None
+    return None
 
 async def generate_unique_id():
     timestamp = int(time.time())
