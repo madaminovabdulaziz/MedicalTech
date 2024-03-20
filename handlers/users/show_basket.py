@@ -41,7 +41,7 @@ def format_orders_message(orders):
 
     db = Session()
     if not orders:
-        return "No orders found with the specified status."
+        return "У вас пока нет заказов!"
     message = "<b>Ваши заказы</b>\n"
     counter = 1
 
