@@ -120,7 +120,7 @@ async def generate_cart_message(telegram_id):
                 message += f"\n\n<b>Общий:</b> {total_sum}-сум\n\n"
                 message += f"🚖 Бесплатная доставка по городу Ташкент!"
             else:
-                return False
+                return 'Ваша корзина пуста!'
 
         else:
             pass
