@@ -323,7 +323,7 @@ async def stepswithZakaz(call: CallbackQuery, state: FSMContext):
     if data[1] == "confirm":
         db = Session()
         db.query(Orders).filter(Orders.order_number == order_num).update({
-            Orders.status:"qabul"
+            Orders.status: "qabul"
         })
         db.commit()
 
@@ -340,3 +340,14 @@ async def stepswithZakaz(call: CallbackQuery, state: FSMContext):
         await call.message.reply_location(latitude, longitude)
 
                     
+    elif data[1] == 'cancel':
+        db = Session()
+        db.query(Orders).filter(Orders.order_number == order_num).update({
+            Orders.status: "otkaz"
+        })
+        db.commit()        
+        db.close()
+        await bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+        await call.message.reply("Muvaffaqiyatli bekor qilindi!")
+       
+
