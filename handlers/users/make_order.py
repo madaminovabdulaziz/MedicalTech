@@ -151,7 +151,7 @@ async def proceedBB(call: CallbackQuery, state: FSMContext):
                 await call.message.answer("Ваш заказ принят, администраторы свяжутся с вами в ближайшее время!")
                 await call.message.answer('🏡 Главное меню', reply_markup=menu_ru)
                 await Main.main_menu.set()
-                admins = ['5069131343', '1179337461']
+                admins = ['1179337461', '1002440668']
                 for i in admins:
                     await get_orders_for_user(i, call.from_user.id, or_num)
 
@@ -241,7 +241,7 @@ async def getContact(message: types.Message, state: FSMContext):
         await message.answer("Ваш заказ принят, администраторы свяжутся с вами в ближайшее время!")
         await message.answer('🏡 Главное меню', reply_markup=menu_ru)
         await Main.main_menu.set()
-        admins = ['5069131343', '1179337461']
+        admins = ['1179337461', '1002440668']
         for i in admins:
             await get_orders_for_user(i, message.from_user.id, or_num)
 
@@ -297,7 +297,7 @@ async def getContact(message: types.Message, state: FSMContext):
                 await message.answer("Ваш заказ принят, администраторы свяжутся с вами в ближайшее время")
                 await message.answer('🏡 Главное меню', reply_markup=menu_ru)
                 await Main.main_menu.set()
-                admins = ['5069131343', '1179337461']
+                admins = ['1179337461', '1002440668']
                 for i in admins:
                     await get_orders_for_user(i, message.from_user.id, or_num)
                 
@@ -314,7 +314,7 @@ async def getContact(message: types.Message, state: FSMContext):
 
                     
 
-admins = ['5069131343', '1179337461']
+admins = ['1179337461', '1002440668']
 
 @dp.callback_query_handler(text_contains='zakaz', chat_id=admins, state="*")
 async def stepswithZakaz(call: CallbackQuery, state: FSMContext):
