@@ -42,14 +42,13 @@ def condirmation():
     btn.insert(InlineKeyboardButton(text="❌ Bekor qilish", callback_data='product:cancel'))
     return btn
 
-
 def changelog(category_id, product_id):
     btn = InlineKeyboardMarkup(row_width=1)
     btn.insert(InlineKeyboardButton(text="🔗 Mahsulot uchun link", callback_data=f'change:link:{product_id}'))
-    btn.insert(InlineKeyboardButton(text="🔄 Nomini o'zgartirish", callback_data='change:title'))
-    btn.insert(InlineKeyboardButton(text="🔄 Narxini o'zgartirish", callback_data='change:price'))
-    btn.insert(InlineKeyboardButton(text="🔄 Qo'shimcha ma'lumotni o'zgartirish", callback_data='change:desc'))
-    btn.insert(InlineKeyboardButton(text="🔄 Rasmni o'zgartirish", callback_data='change:photo'))
+    btn.insert(InlineKeyboardButton(text="🔄 Nomini o'zgartirish", callback_data=f'change:title:{product_id}'))
+    btn.insert(InlineKeyboardButton(text="🔄 Narxini o'zgartirish", callback_data=f'change:price:{product_id}'))
+    btn.insert(InlineKeyboardButton(text="🔄 Qo'shimcha ma'lumotni o'zgartirish", callback_data=f'change:desc:{product_id}'))
+    btn.insert(InlineKeyboardButton(text="🔄 Rasmni o'zgartirish", callback_data=f'change:photo:{product_id}'))
     btn.insert(InlineKeyboardButton(text="⬅️ Ortga", callback_data=f'change:back:{category_id}'))
     btn.insert(InlineKeyboardButton(text="❌ O'chirish", callback_data=f'change:delete:{product_id}'))
    
