@@ -234,6 +234,9 @@ async def proceedbasketbtn(message: types.Message, state: FSMContext):
 
 
 
+
+
+
 @dp.callback_query_handler(state='get_quantity')
 async def process_callback_button(callback_query: types.CallbackQuery, state: FSMContext):
     current_value = int(callback_query.message.reply_markup.inline_keyboard[0][1].text)
@@ -245,35 +248,45 @@ async def process_callback_button(callback_query: types.CallbackQuery, state: FS
         current_value = '0'
     
     elif callback_query.data.startswith('add'):
+        db = Session()
         if current_value != 0:
             info = callback_query.data.rsplit(":")
             pr_id = info[1]
-            try:
-                db = Session()
-                is_cart_exists = db.query(Cart).filter(Cart.product_id == pr_id, Cart.user_id == callback_query.from_user.id).first()
-                if is_cart_exists:
-                    updated_cart = db.query(Cart).filter(Cart.product_id == pr_id, Cart.user_id == callback_query.from_user.id).update({
-                        Cart.quantity: Cart.quantity + current_value
-                    })
-                    db.commit()
-                else:
-                    new_cart = Cart(
-                        user_id=callback_query.from_user.id,
-                        product_id=pr_id,
-                        quantity=current_value
-                    )
-                    db.add(new_cart)
-                    db.commit()
-            finally:
-                db.close()
-            await callback_query.message.delete()
-            info = await state.get_data()
-            category_id = info.get('category_id')
-            await callback_query.message.answer("✅Товар добавлен в корзину!", reply_markup=ReplyKeyboardRemove())
-            markup = await products_markup_uz(category_id)
-            category_info = db.query(Categories).filter(Categories.id == category_id).first()
-            await callback_query.message.answer(f"📦 товары категории <b>{category_info.category}:</b>", reply_markup=markup)
-            await Main.main_menu.set()
+            product = db.query(Products).filter(Products.id == pr_id).first()
+            min_order = int(product.min_order)
+            if current_value >= min_order:
+                try:  
+                    is_cart_exists = db.query(Cart).filter(Cart.product_id == pr_id, Cart.user_id == callback_query.from_user.id).first()
+                    if is_cart_exists:
+                        updated_cart = db.query(Cart).filter(Cart.product_id == pr_id, Cart.user_id == callback_query.from_user.id).update({
+                            Cart.quantity: Cart.quantity + current_value
+                        })
+                        db.commit()
+                    else:
+                        new_cart = Cart(
+                            user_id=callback_query.from_user.id,
+                            product_id=pr_id,
+                            quantity=current_value
+                        )
+                        db.add(new_cart)
+                        db.commit()
+                finally:
+                    db.close()
+                await callback_query.message.delete()
+                info = await state.get_data()
+                category_id = info.get('category_id')
+                await callback_query.message.answer("✅Товар добавлен в корзину!", reply_markup=ReplyKeyboardRemove())
+                markup = await products_markup_uz(category_id)
+                category_info = db.query(Categories).filter(Categories.id == category_id).first()
+                await callback_query.message.answer(f"📦 товары категории <b>{category_info.category}:</b>", reply_markup=markup)
+                await Main.main_menu.set()
+            
+            else:
+                await bot.answer_callback_query(callback_query.id, f"Минимальное количество заказов {min_order}!", show_alert=True)
+
+
+
+
         else:
             await bot.answer_callback_query(callback_query.id, "Сначала введите количество продукта!", show_alert=True)
 
