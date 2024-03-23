@@ -290,6 +290,121 @@ async def proceedChanges(call: CallbackQuery, state: FSMContext):
         finally:
             db.close()
 
+    elif data[1] == 'title':
+        await state.update_data({"product_num": data[2]})
+        await call.message.answer('Mahsulot nomini kiriting: ')
+        await state.set_state('change_title')
+    
+    elif data[1] == 'price':
+        await state.update_data({"product_num": data[2]})
+        await call.message.answer('Mahsulot narxini kiriting: ')
+        await state.set_state('change_price')
+
+    elif data[1] == 'desc':
+        await state.update_data({"product_num": data[2]})
+        await call.message.answer("Qo'shimcha ma'lumot kiriting: ")
+        await state.set_state('change_desc')
+
+    elif data[1] == 'photo':
+        await state.update_data({"product_num": data[2]})
+        await call.message.answer("Rasm yuboring: ")
+        await state.set_state('change_photo')
+
+
+
+
+@dp.message_handler(state='change_title')
+async def ChangeProductTitle(message: types.Message, state: FSMContext):
+    new_title = message.text
+    data = await state.get_data()
+    pr_id = data.get('product_num')
+    db = Session()
+    db.query(Products).filter(Products.id == pr_id).update({
+        Products.title: new_title
+    })
+
+    db.commit()
+   
+
+    await message.answer("Muvaffaqiyatli o'zgardi!")
+    product = db.query(Products).filter(Products.id == pr_id).first()
+    await message.answer_photo(photo=product.photo_id, caption=product_message(product.title, product.price, product.sterile_status, product.description), reply_markup=changelog(product.category_id, pr_id))
+    await state.set_state('get_changes')
+    db.close()
+
+
+
+@dp.message_handler(state='change_price')
+async def ChangeProductPrice(message: types.Message, state: FSMContext):
+    new_price = message.text
+    data = await state.get_data()
+    pr_id = data.get('product_num')
+    db = Session()
+    if new_price.isdigit():
+        db.query(Products).filter(Products.id == pr_id).update({
+        Products.price: new_price
+        })
+        db.commit()
+        
+
+        await message.answer("Muvaffaqiyatli o'zgardi!")
+        product = db.query(Products).filter(Products.id == pr_id).first()
+        await message.answer_photo(photo=product.photo_id, caption=product_message(product.title, product.price, product.sterile_status, product.description), reply_markup=changelog(product.category_id, pr_id))
+        await state.set_state('get_changes')     
+        db.close()
+    else:
+        await message.answer('Iltimos, narxni faqat son tarzda kiriting!')
+        return
+    
+
+
+
+@dp.message_handler(state='change_desc')
+async def ChangeProductDesc(message: types.Message, state: FSMContext):
+    new_desc = message.text
+    data = await state.get_data()
+    pr_id = data.get('product_num')
+    db = Session()
+    db.query(Products).filter(Products.id == pr_id).update({
+        Products.description: new_desc
+    })
+
+    db.commit()
+    
+
+    await message.answer("Muvaffaqiyatli o'zgardi!")
+    product = db.query(Products).filter(Products.id == pr_id).first()
+    await message.answer_photo(photo=product.photo_id, caption=product_message(product.title, product.price, product.sterile_status, product.description), reply_markup=changelog(product.category_id, pr_id))
+    await state.set_state('get_changes')
+    db.close()
+
+
+
+@dp.message_handler(content_types=types.ContentType.PHOTO, state='change_photo')
+async def ChangeProductPhoto(message: types.Message, state: FSMContext):
+    photoss = message.photo[-1].file_id
+    print(photoss)
+    data = await state.get_data()
+    pr_id = data.get('product_num')
+    print(pr_id)
+    db = Session()
+    # print(pr_id)
+    if db.query(Products).filter(Products.id == pr_id).first():
+        db.query(Products).filter(Products.id == pr_id).update({
+            Products.photo_id: photoss
+        })
+
+        db.commit()
+        print("RASM COMMIT")
+        
+
+        await message.answer("Muvaffaqiyatli o'zgardi!")
+        product = db.query(Products).filter(Products.id == pr_id).first()
+        await message.answer_photo(photo=product.photo_id, caption=product_message(product.title, product.price, product.sterile_status, product.description), reply_markup=changelog(product.category_id, pr_id))
+        await state.set_state('get_changes')
+        db.close()
+
+
 
 
 @dp.message_handler(state="get_category_name")
