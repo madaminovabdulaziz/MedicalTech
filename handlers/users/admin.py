@@ -17,7 +17,6 @@ import pandas as pd
 from openpyxl import load_workbook
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-import os
 
 def admins_btn():
     btn = InlineKeyboardMarkup(row_width=1)
@@ -41,6 +40,7 @@ def condirmation():
     btn.insert(InlineKeyboardButton(text="✅ Tasdiqlash", callback_data='product:confirm'))
     btn.insert(InlineKeyboardButton(text="❌ Bekor qilish", callback_data='product:cancel'))
     return btn
+
 
 def changelog(category_id, product_id):
     btn = InlineKeyboardMarkup(row_width=1)
@@ -89,7 +89,7 @@ async def products_markup_hey(category_id):
         db.close()
 
 
-admins = ['5069131343', '1179337461', '1002440668']
+admins = ['5069131343', '1179337461']
 @dp.message_handler(commands='admin', chat_id=admins, state="*")
 async def showPanel(message: types.Message, state: FSMContext):
     await message.answer('Admin panelga xush kelibsiz!', reply_markup=admins_btn())
@@ -141,48 +141,9 @@ async def next_step_1(call: CallbackQuery, state: FSMContext):
 
         # Send the Excel file
         with open(excel_file_path, 'rb') as file:
-            await bot.send_document(call.from_user.id, file)
+            await bot.send_document('1179337461', file)
 
         db.close()
-        os.remove(excel_file_path)
-        
-
-        # data = list()
-        # db = Session()
-        # orders = db.query(Orders).options(joinedload(Orders.user), joinedload(Orders.product)).all()
-        # for order in orders:
-        #     order_data = (
-        #         order.id,
-        #         order.user.full_name,
-        #         order.user.phone,
-        #         order.product.title,
-        #         order.quantity_ordered,
-        #         order.total_price,
-        #         order.order_date,
-        #         order.status
-        #     )
-        #     data.append(order_data)
-
-        
-        # columns = ['Buyurtma ID', 'Klient', 'Telefon raqami','Mahsulot', 'Soni', 'Umumiy narxi', 'Buyurtma sanasi', 'Status']
-        # df = pd.DataFrame(data, columns=columns)
-        # current_datetime = datetime.now()
-
-        # formatted_date = current_datetime.strftime("%d.%m.%Y")
-
-        # df.to_excel(f"files/{formatted_date}.xlsx", index=False)
-        # with open(f"files/{formatted_date}.xlsx", 'rb') as file:
-        #     await bot.send_document('1179337461', file)
-
-                
-        # db.close()
-
-
-
-
-
-
-
 
 @dp.callback_query_handler(text_contains='admin', state='get_admin_option')
 async def next_step_1(call: CallbackQuery, state: FSMContext):
@@ -308,8 +269,7 @@ async def proceedChanges(call: CallbackQuery, state: FSMContext):
         await state.update_data({"product_num": data[2]})
         await call.message.answer("Rasm yuboring: ")
         await state.set_state('change_photo')
-
-
+    
 
 
 @dp.message_handler(state='change_title')
@@ -406,6 +366,8 @@ async def ChangeProductPhoto(message: types.Message, state: FSMContext):
 
 
 
+
+
 @dp.message_handler(state="get_category_name")
 async def saveCategory(message: types.Message, state: FSMContext):
     db = Session()
@@ -472,15 +434,25 @@ async def getPhoto(message: types.Message, state: FSMContext):
     photo = message.photo[-1].file_id
     await state.update_data({"photo": photo})
 
-    data = await state.get_data()
-    title = data.get('title')
-    price = data.get('price')
-    is_sterile = data.get('is_sterile')
-    description = data.get('description')
+    await message.answer("Minimum zakazlar sonini kiriting: ")
+    await state.set_state('get_min_orders')
 
+   
 
-    await message.answer_photo(photo=photo, caption=product_message(title, price, is_sterile, description), reply_markup=condirmation())
-    await state.set_state('wait_for_confirm')
+@dp.message_handler(state='get_min_orders')
+async def getMinOrder(message: types.Message, state: FSMContext):
+    min_orders = message.text
+    if min_orders.isdigit():
+        await state.update_data({"min_order": min_orders})
+        data = await state.get_data()
+        photo = data.get('photo')
+        title = data.get('title')
+        price = data.get('price')
+        is_sterile = data.get('is_sterile')
+        description = data.get('description')
+
+        await message.answer_photo(photo=photo, caption=product_message(title, price, is_sterile, description), reply_markup=condirmation())
+        await state.set_state('wait_for_confirm')
 
 
 @dp.callback_query_handler(text_contains='product', state='wait_for_confirm')
@@ -490,13 +462,13 @@ async def getForConfirmation(call: CallbackQuery, state: FSMContext):
     try:
         if info[1] == "confirm":
             data = await state.get_data()
-
             category_id = data.get('category_id')
             title = data.get('title')
             price = data.get('price')
             is_sterile = data.get('is_sterile')
             description = data.get('description')
             photo = data.get('photo')
+            min_or = data.get('min_order')
 
             new_Product = Products(
                 title=title,
@@ -504,7 +476,8 @@ async def getForConfirmation(call: CallbackQuery, state: FSMContext):
                 price=price,
                 sterile_status=is_sterile,
                 description=description,
-                photo_id=photo
+                photo_id=photo,
+                min_order=min_or
             )
 
             db.add(new_Product)
@@ -518,15 +491,3 @@ async def getForConfirmation(call: CallbackQuery, state: FSMContext):
 
         db.close()
 
-
-
-@dp.message_handler(commands=['buy'], state="*")
-async def buy(message: types.Message):
-    # Create an invoice
-    invoice = types.LabeledPrice(label='Product', amount=1000)  # Amount is in smallest currency unit (e.g., cents)
-    await bot.send_invoice(message.chat.id, title='Product', description='Description of the product', payload='payload', provider_token='your_provider_token', start_parameter='start_parameter', currency='USD', prices=[invoice])
-
-@dp.message_handler(content_types=['successful_payment'])
-async def successful_payment(message: types.Message):
-    # Handle successful payment
-    await message.answer('Thank you for your payment!')
