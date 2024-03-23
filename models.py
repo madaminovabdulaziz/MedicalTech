@@ -40,7 +40,11 @@ class Products(Base):
     sterile_status = Column(String(255))
     description = Column(String(2000))
     photo_id = Column(String(1000))
+    min_order = Column(String(255))
 
+
+
+    
     order = relationship('Orders', back_populates='product')
     cart = relationship('Cart', back_populates='product')
     category = relationship("Categories", back_populates='product')
