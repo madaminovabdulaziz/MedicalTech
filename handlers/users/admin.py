@@ -231,7 +231,7 @@ async def proceedChanges(call: CallbackQuery, state: FSMContext):
 
     elif data[1] == "link":
         product_id = data[2]
-        link = f"https://t.me/techmedicalbot?start=product-{product_id}"
+        link = f"https://t.me/MedicalTechUzBot?start=product-{product_id}"
         await call.message.answer(f"Mahsulot uchun link:\n\n\n{link}")
 
     
