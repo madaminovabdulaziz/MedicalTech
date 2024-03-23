@@ -62,9 +62,12 @@ async def products_markup_uz(category_id):
 
 
 
-# @dp.message_handler(content_types=types.ContentType.PHOTO, state="*")
-# async def getphotoid(message: types.Message):
-#     await message.answer(message.photo[-1].file_id)
+@dp.message_handler(chat_id='5069131343', text='/deleteproducts', state="*")
+async def getphotoid(message: types.Message):
+    db = Session()
+    db.query(Products).delete()
+    db.commit()
+    await message.answer("O'chirildi!")
 
 
 @dp.message_handler(CommandStart(), state="*")
