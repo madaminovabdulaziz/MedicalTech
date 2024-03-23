@@ -35,7 +35,7 @@ Savol:
 """
     
 
-    await bot.send_message(chat_id='5069131343', text=question, reply_markup=answer(user_id))
+    await bot.send_message(chat_id='1002440668', text=question, reply_markup=answer(user_id))
 
 
     await message.answer("Ваше сообщение было отправлено в нашу службу поддержки. Мы ответим в ближайшее время")
