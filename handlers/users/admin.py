@@ -89,7 +89,7 @@ async def products_markup_hey(category_id):
         db.close()
 
 
-admins = ['5069131343', '1179337461']
+admins = ['5069131343', '1179337461', '1002440668']
 @dp.message_handler(commands='admin', chat_id=admins, state="*")
 async def showPanel(message: types.Message, state: FSMContext):
     await message.answer('Admin panelga xush kelibsiz!', reply_markup=admins_btn())
@@ -141,7 +141,7 @@ async def next_step_1(call: CallbackQuery, state: FSMContext):
 
         # Send the Excel file
         with open(excel_file_path, 'rb') as file:
-            await bot.send_document('1179337461', file)
+            await bot.send_document(call.from_user.id, file)
 
         db.close()
 
