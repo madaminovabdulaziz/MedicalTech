@@ -8,3 +8,4 @@ XlsxWriter
 pandas
 numpy
 requests
+cryptography
